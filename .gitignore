@@ -1,0 +1,6 @@
+bin/
+dist/
+vendor/
+.idea/
+.env
+.DS_Store
