@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7bbf61d40dea5b5d36b33ba89eedf01",
+    "content-hash": "4ed4a147a355735084e689d9b56afb42",
     "packages": [
         {
             "name": "globee/payment-api",
@@ -607,22 +607,6 @@
             "time": "2017-05-10T09:20:27+00:00"
         },
         {
-            "name": "opencart/opencart",
-            "version": "3.0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/opencart/opencart",
-                "reference": "7911c76c43e29ddc1e4168f36dff6a0be6179719"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/opencart/opencart/archive/3.0.2.0.zip",
-                "reference": "7911c76c43e29ddc1e4168f36dff6a0be6179719",
-                "shasum": null
-            },
-            "type": "library"
-        },
-        {
             "name": "psr/container",
             "version": "1.0.0",
             "source": {
@@ -1169,52 +1153,6 @@
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
             "time": "2018-05-30T07:26:09+00:00"
-        },
-        {
-            "name": "vlucas/phpdotenv",
-            "version": "v1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vlucas/phpdotenv.git",
-                "reference": "0cac554ce06277e33ddf9f0b7ade4b8bbf2af3fa"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/0cac554ce06277e33ddf9f0b7ade4b8bbf2af3fa",
-                "reference": "0cac554ce06277e33ddf9f0b7ade4b8bbf2af3fa",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.2"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Dotenv": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD"
-            ],
-            "authors": [
-                {
-                    "name": "Vance Lucas",
-                    "email": "vance@vancelucas.com",
-                    "homepage": "http://www.vancelucas.com"
-                }
-            ],
-            "description": "Loads environment variables from `.env` to `getenv()`, `$_ENV` and `$_SERVER` automagically.",
-            "homepage": "http://github.com/vlucas/phpdotenv",
-            "keywords": [
-                "dotenv",
-                "env",
-                "environment"
-            ],
-            "time": "2015-05-30T15:59:26+00:00"
         }
     ],
     "aliases": [],
