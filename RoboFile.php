@@ -31,5 +31,9 @@ class RoboFile extends \Robo\Tasks
             ->arg('../globee-opencart-3.0.2.ocmod.zip')
             ->arg('./')
             ->run();
+
+        // Delete the directory
+        $this->taskDeleteDir('dist/globee-opencart-3.0.2')
+            ->run();
     }
 }
