@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ed4a147a355735084e689d9b56afb42",
+    "content-hash": "d8710b51ae08b3de2b581c667af61076",
     "packages": [
         {
             "name": "globee/payment-api",
@@ -605,6 +605,22 @@
                 "service"
             ],
             "time": "2017-05-10T09:20:27+00:00"
+        },
+        {
+            "name": "opencart/opencart",
+            "version": "3.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opencart/opencart",
+                "reference": "7911c76c43e29ddc1e4168f36dff6a0be6179719"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/opencart/opencart/archive/3.0.2.0.zip",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "library"
         },
         {
             "name": "psr/container",

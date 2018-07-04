@@ -9,12 +9,31 @@
         "name": "GloBee",
         "homepage": "https://globee.com"
     }],
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "opencart/opencart",
+                "version": "3.0.2.0",
+                "dist": {
+                    "url": "https://github.com/opencart/opencart/archive/3.0.2.0.zip",
+                    "type": "zip"
+                },
+                "source": {
+                    "url": "https://github.com/opencart/opencart",
+                    "type": "git",
+                    "reference": "7911c76c43e29ddc1e4168f36dff6a0be6179719"
+                }
+            }
+        }
+    ],
     "require": {
         "php" : ">=5.4.0",
         "globee/payment-api": "v0.3.0"
     },
     "require-dev": {
-        "consolidation/robo": "*"
+        "consolidation/robo": "*",
+        "opencart/opencart" : "3.0.2.0"
     },
     "minimum-stability": "stable",
     "config": {
