@@ -132,6 +132,7 @@ class ControllerExtensionPaymentGlobee extends Controller
         // Labels
         $data['label_edit'] = $this->language->get('label_edit');
         $data['label_enabled'] = $this->language->get('label_enabled');
+        $data['label_sort_order'] = $this->language->get('label_sort_order');
         $data['label_network'] = $this->language->get('label_network');
         $data['label_payment_api_key'] = $this->language->get('label_payment_api_key');
         $data['label_risk_speed'] = $this->language->get('label_risk_speed');
@@ -158,7 +159,8 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         // Load saved values
-        $data['value_enabled'] = $this->config->get('payment_globee_enabled');
+        $data['value_enabled'] = $this->config->get('payment_globee_status');
+        $data['value_sort_order'] = $this->config->get('payment_globee_sort_order');
         $data['value_livenet'] = $this->config->get('payment_globee_livenet');
         $data['value_payment_api_key'] = $this->config->get('payment_globee_payment_api_key');
         $data['value_risk_speed'] = $this->config->get('payment_globee_risk_speed');

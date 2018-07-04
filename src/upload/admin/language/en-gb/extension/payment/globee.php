@@ -19,7 +19,8 @@ $_['tab_settings'] = 'Settings';
 $_['tab_log'] = 'Log';
 
 $_['label_edit'] = 'Edit GloBee';
-$_['label_enabled'] = 'Enabled';
+$_['label_enabled'] = 'Status';
+$_['label_sort_order'] = 'Sort Order';
 $_['label_network'] = 'Network';
 $_['label_payment_api_key'] = 'Payment API Key';
 $_['label_risk_speed'] = 'Notification Speed';

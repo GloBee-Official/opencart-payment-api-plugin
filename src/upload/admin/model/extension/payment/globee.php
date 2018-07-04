@@ -4,7 +4,8 @@ class ModelExtensionPaymentGlobee extends Model
 {
     public function install()
     {
-        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_enabled','0','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_status','0','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_sort_order','1','0');");
         $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_livenet','1','0');");
         $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_payment_api_key','','0');");
         $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','payment_globee','payment_globee_risk_speed','medium','0');");
@@ -18,7 +19,8 @@ class ModelExtensionPaymentGlobee extends Model
 
     public function uninstall()
     {
-        $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_enabled';");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_status';");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_sort_order';");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_livenet';");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_payment_api_key';");
         $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE key = 'payment_globee_risk_speed';");
