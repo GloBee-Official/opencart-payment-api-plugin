@@ -47,6 +47,7 @@ class ControllerExtensionPaymentGlobee extends Controller
         $log = new Log('globee.log');
         $log->write($message);
     }
+
     /**
      * Plugin installer
      */
@@ -183,7 +184,7 @@ class ControllerExtensionPaymentGlobee extends Controller
             }
         }
         if (empty($data['log'])) {
-            $data['log'] = '<i>No log data available yet...</i>';
+            $data['log'] = '<i>No log data available. Is Debugging switched on?</i>';
         }
 
         // Send output to browser
@@ -224,19 +225,19 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         // Ensure the plugin cannot be activated without a payment api key
-        if ($this->request->post['payment_globee_enabled'] == 1 && empty($this->request->post['payment_globee_payment_api_key'])) {
+        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_payment_api_key'])) {
             $data['error_enabled'] = $this->language->get('notification_error_payment_api_key_enabled');
             $data['error_payment_api_key'] = $this->language->get('notification_error_payment_api_key');
         }
 
         // Ensure the plugin cannot be activated without a callback URL
-        if ($this->request->post['payment_globee_enabled'] == 1 && empty($this->request->post['payment_globee_notification_url'])) {
+        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_notification_url'])) {
             $data['error_enabled'] = $this->language->get('notification_error_notification_url_enabled');
             $data['error_notification_url'] = $this->language->get('notification_error_notification_url');
         }
 
         // Ensure the plugin cannot be activated without a redirect URL
-        if ($this->request->post['payment_globee_enabled'] == 1 && empty($this->request->post['payment_globee_redirect_url'])) {
+        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_redirect_url'])) {
             $data['error_enabled'] = $this->language->get('notification_error_redirect_url_enabled');
             $data['error_redirect_url'] = $this->language->get('notification_error_redirect_url');
         }
