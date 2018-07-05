@@ -3,6 +3,7 @@
 require __DIR__.'/../../../../system/library/globee/autoload.php';
 
 use GloBee\PaymentApi\Connectors\GloBeeCurlConnector;
+use GloBee\PaymentApi\Exceptions\Validation\ValidationException;
 use GloBee\PaymentApi\Models\PaymentRequest;
 use GloBee\PaymentApi\PaymentApi;
 
@@ -22,6 +23,10 @@ class ControllerExtensionPaymentGloBee extends Controller
         $data['warning_testnet'] = $this->language->get('warning_testnet');
         $data['url_redirect'] = $this->url->link('extension/payment/globee/confirm', $this->config->get('config_secure'));
         $data['button_confirm'] = $this->language->get('button_confirm');
+        if (isset($this->session->data['error_globee'])) {
+            $data['error_globee'] = $this->session->data['error_globee'];
+            unset($this->session->data['error_globee']);
+        }
 
         if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/extension/payment/globee')) {
             return $this->load->view($this->config->get('config_template').'/template/extension/payment/globee', $data);
@@ -63,7 +68,19 @@ class ControllerExtensionPaymentGloBee extends Controller
         $paymentRequest->currency = $order_info['currency_code'];
         $paymentRequest->customPaymentId = $this->session->data['order_id'];
 
-        $response = $paymentApi->createPaymentRequest($paymentRequest);
+        try {
+            $response = $paymentApi->createPaymentRequest($paymentRequest);
+        } catch (ValidationException $exception) {
+            $errors = '';
+            foreach ($exception->getErrors() as $error) {
+                $errors .= $error['message']."<br/>";
+            }
+            $this->log('Error Checking Out: '.$errors);
+            $this->session->data['error_globee'] = 'Sorry, but there was a problem creating the Payment Request on GloBee:</br>'.$errors;
+            $this->response->redirect($this->url->link('checkout/checkout'));
+
+            return;
+        }
 
         $this->session->data['globee_invoice_id'] = $response->id;
 
