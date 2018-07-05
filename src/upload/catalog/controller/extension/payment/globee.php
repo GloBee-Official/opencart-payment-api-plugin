@@ -152,15 +152,15 @@ class ControllerExtensionPaymentGloBee extends Controller
 
         switch ($paymentRequest->status) {
             case 'paid':
-                $this->log('Marking order as paid for Payment Request: '.$json['id']);
+                $this->log('Marking order as paid for Payment Request with GloBee ID: '.$json['id']);
                 $order_status_id = $this->config->get('payment_globee_paid_status');
                 break;
             case 'confirmed':
-                $this->log('Marking order as confirmed for Payment Request: '.$json['id']);
+                $this->log('Marking order as confirmed for Payment Request with GloBee ID: '.$json['id']);
                 $order_status_id = $this->config->get('payment_globee_confirmed_status');
                 break;
             case 'complete':
-                $this->log('Marking order as completed for Payment Request: '.$json['id']);
+                $this->log('Marking order as completed for Payment Request with GloBee ID: '.$json['id']);
                 $order_status_id = $this->config->get('payment_globee_completed_status');
                 break;
             default:
