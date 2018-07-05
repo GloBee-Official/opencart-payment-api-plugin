@@ -1,5 +1,12 @@
 <?php
 
+require __DIR__.'/../../../../system/library/globee/autoload.php';
+
+use GloBee\PaymentApi\Connectors\GloBeeCurlConnector;
+use GloBee\PaymentApi\Exceptions\Http\AuthenticationException;
+use GloBee\PaymentApi\Models\PaymentRequest;
+use GloBee\PaymentApi\PaymentApi;
+
 class ControllerExtensionPaymentGlobee extends Controller
 {
     /** @var array */
@@ -246,6 +253,23 @@ class ControllerExtensionPaymentGlobee extends Controller
             $data['error_enabled'] = $this->language->get('notification_error_redirect_url_enabled');
             $data['error_redirect_url'] = $this->language->get('notification_error_redirect_url');
         }
+
+        // Check that if the Payment API Key was changed, it can communicate with GloBee
+        if (
+            $this->config->get('payment_globee_payment_api_key') != $this->request->post['payment_globee_redirect_url'] ||
+            $this->config->get('payment_globee_livenet') != $this->request->post['payment_globee_livenet']
+        ) {
+
+            $connector = new GloBeeCurlConnector($this->request->post['payment_globee_payment_api_key'], $this->request->post['payment_globee_livenet']);
+            $paymentApi = new PaymentApi($connector);
+
+            try {
+               $paymentApi->getAccount();
+            } catch (AuthenticationException $exception) {
+                $data['error_payment_api_key'] = $this->language->get('notification_error_communication_failed');
+            }
+        }
+
 
         return $data;
     }
