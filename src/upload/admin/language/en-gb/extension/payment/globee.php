@@ -31,7 +31,7 @@ $_['label_notification_url'] = 'Callback URL (IPN)';
 $_['label_redirect_url'] = 'Redirect URL';
 $_['label_debugging'] = 'Debugging';
 
-$_['text_payment'] = 'Payment';
+$_['text_payment'] = 'Extensions';
 $_['text_enabled'] = 'Enabled';
 $_['text_disabled'] = 'Disabled';
 $_['text_low'] = 'Low (Secure)';
