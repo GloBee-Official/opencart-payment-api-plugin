@@ -17,6 +17,11 @@ class ControllerExtensionPaymentGlobee extends Controller
     {
         parent::__construct($registry);
 
+        if (!empty($missingRequirements = $this->missingRequirements())) {
+            echo $missingRequirements;
+            exit;
+        }
+
         $this->registry = $registry;
 
         $this->load->language('extension/payment/globee');
@@ -243,5 +248,42 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Checks that the system meets the minimum requirements to use the GloBee plugin.
+     *
+     * @return string
+     */
+    private function missingRequirements()
+    {
+        $errors = [];
+        $contactYourWebAdmin = " in order to function. Please contact your web server administrator for assistance.";
+
+        # PHP
+        if (true === version_compare(PHP_VERSION, '5.4.0', '<')) {
+            $errors[] = 'Your PHP version is too old. The GloBee payment plugin requires PHP 5.4 or higher'
+                .$contactYourWebAdmin;
+        }
+
+        # OpenSSL
+        if (extension_loaded('openssl') === false) {
+            $errors[] = 'The GloBee payment plugin requires the OpenSSL extension for PHP'.$contactYourWebAdmin;
+        }
+
+        # GMP or BCMath
+        if (false === extension_loaded('gmp') && false === extension_loaded('bcmath')) {
+            $errors[] = 'The GloBee payment plugin requires the GMP extension or BCMath extension for PHP'
+                .$contactYourWebAdmin;
+        }
+
+        # Curl required
+        if (false === extension_loaded('curl')) {
+            $errors[] = 'The GloBee payment plugin requires the Curl extension for PHP'.$contactYourWebAdmin;
+        }
+
+        if (!empty($errors)) {
+            return implode("<br>\n", $errors);
+        }
     }
 }
