@@ -259,7 +259,6 @@ class ControllerExtensionPaymentGlobee extends Controller
             $this->config->get('payment_globee_payment_api_key') != $this->request->post['payment_globee_redirect_url'] ||
             $this->config->get('payment_globee_livenet') != $this->request->post['payment_globee_livenet']
         ) {
-
             $connector = new GloBeeCurlConnector($this->request->post['payment_globee_payment_api_key'], $this->request->post['payment_globee_livenet']);
             $paymentApi = new PaymentApi($connector);
 
@@ -269,7 +268,6 @@ class ControllerExtensionPaymentGlobee extends Controller
                 $data['error_payment_api_key'] = $this->language->get('notification_error_communication_failed');
             }
         }
-
 
         return $data;
     }
@@ -287,6 +285,12 @@ class ControllerExtensionPaymentGlobee extends Controller
         # PHP
         if (true === version_compare(PHP_VERSION, '5.5.0', '<')) {
             $errors[] = 'Your PHP version is too old. The GloBee payment plugin requires PHP 5.4 or higher'
+                .$contactYourWebAdmin;
+        }
+
+        # OpenCart
+        if (true === version_compare(VERSION, '3.0.0', '<')) {
+            $errors[] = 'Your Opencart version is too old. This plugin is intended for OpenCart v3.0.0 and above'
                 .$contactYourWebAdmin;
         }
 
