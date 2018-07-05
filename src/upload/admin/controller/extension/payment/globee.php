@@ -261,7 +261,7 @@ class ControllerExtensionPaymentGlobee extends Controller
         $contactYourWebAdmin = " in order to function. Please contact your web server administrator for assistance.";
 
         # PHP
-        if (true === version_compare(PHP_VERSION, '5.4.0', '<')) {
+        if (true === version_compare(PHP_VERSION, '5.5.0', '<')) {
             $errors[] = 'Your PHP version is too old. The GloBee payment plugin requires PHP 5.4 or higher'
                 .$contactYourWebAdmin;
         }
@@ -275,6 +275,11 @@ class ControllerExtensionPaymentGlobee extends Controller
         if (false === extension_loaded('gmp') && false === extension_loaded('bcmath')) {
             $errors[] = 'The GloBee payment plugin requires the GMP extension or BCMath extension for PHP'
                 .$contactYourWebAdmin;
+        }
+
+        # Json
+        if (extension_loaded('json') === false) {
+            $errors[] = 'The GloBee payment plugin requires the JSON extension for PHP'.$contactYourWebAdmin;
         }
 
         # Curl required

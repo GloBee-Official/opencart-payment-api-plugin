@@ -8,9 +8,9 @@ Please check the [Plugin Page](https://globee.com/opencart) for instructions on 
 OpenCart website.
 
 ### Server requirements
-PHP > 5.5 or PHP > 7.0, with the following PHP plugins enabled:
-* GMP or BCMATH
+PHP > 5.5 with the following PHP plugins enabled:
 * OpenSSL
+* GMP or BCMATH
 * JSON
 * CURL
 
