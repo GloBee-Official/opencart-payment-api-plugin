@@ -1,21 +1,6 @@
 <?php
 
-require __DIR__.'/../../../../system/library/globee/Connectors/Connector.php';
-require __DIR__.'/../../../../system/library/globee/Connectors/CurlWrapper.php';
-require __DIR__.'/../../../../system/library/globee/Connectors/GloBeeCurlConnector.php';
-require __DIR__.'/../../../../system/library/globee/PaymentApi.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/LockedPropertyException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/PaymentRequestAlreadyExistsException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/ValidationException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/BelowMinimumException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/InvalidArgumentException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/InvalidEmailException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/InvalidSelectionException.php';
-require __DIR__.'/../../../../system/library/globee/Exceptions/Validation/InvalidUrlException.php';
-require __DIR__.'/../../../../system/library/globee/Models/PropertyTrait.php';
-require __DIR__.'/../../../../system/library/globee/Models/ValidationTrait.php';
-require __DIR__.'/../../../../system/library/globee/Models/Model.php';
-require __DIR__.'/../../../../system/library/globee/Models/PaymentRequest.php';
+require __DIR__.'/../../../../system/library/globee/autoload.php';
 
 use GloBee\PaymentApi\Connectors\GloBeeCurlConnector;
 use GloBee\PaymentApi\Models\PaymentRequest;
