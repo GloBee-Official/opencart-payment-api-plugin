@@ -10,6 +10,7 @@ $_['notification_error_payment_api_key_enabled'] = 'The plugin cannot be activat
 $_['notification_error_notification_url_enabled'] = 'The plugin cannot be activated without a Callback URL';
 $_['notification_error_redirect_url_key_enabled'] = 'The plugin cannot be activated without a Redirect URL';
 $_['notification_error_payment_api_key'] = 'Please enter the Payment API Key';
+$_['notification_error_communication_failed'] = 'The Payment API Key cannot communicate with GloBee. Check that the key is correct for the set network.';
 
 $_['button_save'] = 'Save';
 $_['button_cancel'] = 'Cancel';
