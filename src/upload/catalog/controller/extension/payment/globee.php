@@ -127,21 +127,24 @@ class ControllerExtensionPaymentGloBee extends Controller
         $this->load->model('checkout/order');
 
         $post = file_get_contents("php://input");
-        if (empty($post)) {
-            $this->log('IPN handler called with no data');
-
-            return;
-        }
-        $json = @json_decode($post, true);
-        if (empty($json)) {
-            $this->log('IPN handler called with invalid data: '.$post);
-
+        if (true === empty($post)) {
+            $this->log('GloBee plugin received empty POST data for an IPN message.');
             return;
         }
 
-        if (!array_key_exists('id', $json)) {
-            $this->log('IPN handler called with missing ID: '.$post);
+        $json = json_decode($post, true);
+        if (false === array_key_exists('id', $json)) {
+            $this->log('GloBee plugin received an invalid JSON payload sent to IPN handler: '.$post);
+            return;
+        }
 
+        if (false === array_key_exists('custom_payment_id', $json)) {
+            $this->log('GloBee plugin did not receive a Payment ID present in JSON payload: '.var_export($json, true));
+            return;
+        }
+
+        if (false === array_key_exists('status', $json)) {
+            error_log('GloBee plugin did not receive a status present in JSON payload: '.var_export($json, true));
             return;
         }
 
