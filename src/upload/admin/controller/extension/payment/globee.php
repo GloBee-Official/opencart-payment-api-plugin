@@ -14,6 +14,15 @@ class ControllerExtensionPaymentGlobee extends Controller
 
     /** @var $registry */
     protected $registry;
+    
+    /** @var string  */
+    protected $token = 'user_token';
+
+    /** @var string  */
+    protected $paymentExtensionLink = 'marketplace/extension';
+
+    /** @var string  */
+    protected $code = 'payment_globee';
 
     /**
      * ControllerExtensionPaymentGlobee constructor.
@@ -32,6 +41,12 @@ class ControllerExtensionPaymentGlobee extends Controller
         $this->registry = $registry;
 
         $this->load->language('extension/payment/globee');
+
+        if (true === version_compare(VERSION, '3.0.0', '<')) {
+            $this->token = 'token';
+            $this->paymentExtensionLink = 'extension/extension';
+            $this->code = 'globee';
+        }
     }
 
     /**
@@ -53,7 +68,7 @@ class ControllerExtensionPaymentGlobee extends Controller
      */
     public function log($message)
     {
-        if ($this->config->get('payment_globee_logging') != true) {
+        if ($this->config->get($this->code.'_logging') != true) {
             return;
         }
         $log = new Log('globee.log');
@@ -94,14 +109,14 @@ class ControllerExtensionPaymentGlobee extends Controller
             $data = $this->validate();
             if (empty($data)) {
                 $this->load->model('setting/setting');
-                $this->model_setting_setting->editSetting('payment_globee', $this->request->post);
+                $this->model_setting_setting->editSetting($this->code, $this->request->post);
                 $this->log('Settings Updated.');
                 $this->session->data['success'] = $this->language->get('notification_success');
-                $this->response->redirect($this->url->link('extension/payment/globee', 'user_token='.$this->session->data['user_token'], true));
+                $this->response->redirect($this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], true));
             }
         }
 
-        $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->setTitle($this->language->get('globee'));
 
         // System template
         $data['header'] = $this->load->controller('common/header');
@@ -109,10 +124,10 @@ class ControllerExtensionPaymentGlobee extends Controller
         $data['footer'] = $this->load->controller('common/footer');
 
         // Links
-        $data['url_action'] = $this->url->link('extension/payment/globee', 'user_token='.$this->session->data['user_token'], 'SSL');
-        $data['url_reset'] = $this->url->link('extension/payment/globee/reset', 'user_token='.$this->session->data['user_token'], 'SSL');
-        $data['url_clear'] = $this->url->link('extension/payment/globee/clear', 'user_token='.$this->session->data['user_token'], 'SSL');
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token='.$this->session->data['user_token'].'&type=payment', 'SSL');
+        $data['url_action'] = $this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['url_reset'] = $this->url->link('extension/payment/globee/reset', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['url_clear'] = $this->url->link('extension/payment/globee/clear', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['cancel'] = $this->url->link($this->paymentExtensionLink, $this->token.'='.$this->session->data[$this->token].'&type=payment', 'SSL');
 
         // Buttons
         $data['button_save'] = $this->language->get('button_save');
@@ -123,15 +138,15 @@ class ControllerExtensionPaymentGlobee extends Controller
         $data['breadcrumbs'] = array(
             array(
                 'text' => $this->language->get('text_home'),
-                'href' => $this->url->link('common/dashboard', 'user_token='.$this->session->data['user_token'], true)
+                'href' => $this->url->link('common/dashboard', $this->token.'='.$this->session->data[$this->token], true)
             ),
             array(
                 'text' => $this->language->get('text_payment'),
-                'href' => $this->url->link('marketplace/extension', 'user_token='.$this->session->data['user_token'] . '&type=payment', true)
+                'href' => $this->url->link($this->paymentExtensionLink, $this->token.'='.$this->session->data[$this->token] . '&type=payment', true)
             ),
             array(
-                'text' => $this->language->get('heading_title'),
-                'href' => $this->url->link('extension/payment/globee', 'user_token='.$this->session->data['user_token'], true)
+                'text' => $this->language->get('globee'),
+                'href' => $this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], true)
             ),
         );
 
@@ -140,7 +155,7 @@ class ControllerExtensionPaymentGlobee extends Controller
         $data['tab_log'] = $this->language->get('tab_log');
 
         // Headings
-        $data['heading_title'] = $this->language->get('heading_title');
+        $data['heading_title'] = $this->language->get('globee');
 
         // Labels
         $data['label_edit'] = $this->language->get('label_edit');
@@ -163,6 +178,8 @@ class ControllerExtensionPaymentGlobee extends Controller
         $data['text_low'] = $this->language->get('text_low');
         $data['text_medium'] = $this->language->get('text_medium');
         $data['text_high'] = $this->language->get('text_high');
+        $data['text_livenet'] = $this->language->get('text_livenet');
+        $data['text_testnet'] = $this->language->get('text_testnet');
 
         // Validation
         $data['success'] = '';
@@ -172,17 +189,17 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         // Load saved values
-        $data['value_enabled'] = $this->config->get('payment_globee_status');
-        $data['value_sort_order'] = $this->config->get('payment_globee_sort_order');
-        $data['value_livenet'] = $this->config->get('payment_globee_livenet');
-        $data['value_payment_api_key'] = $this->config->get('payment_globee_payment_api_key');
-        $data['value_risk_speed'] = $this->config->get('payment_globee_risk_speed');
-        $data['value_paid_status'] = $this->config->get('payment_globee_paid_status');
-        $data['value_confirmed_status'] = $this->config->get('payment_globee_confirmed_status');
-        $data['value_completed_status'] = $this->config->get('payment_globee_completed_status');
-        $data['value_notification_url'] = $this->config->get('payment_globee_notification_url');
-        $data['value_redirect_url'] = $this->config->get('payment_globee_redirect_url');
-        $data['value_debugging'] = $this->config->get('payment_globee_logging');
+        $data['value_enabled'] = $this->config->get($this->code.'_status');
+        $data['value_sort_order'] = $this->config->get($this->code.'_sort_order');
+        $data['value_livenet'] = $this->config->get($this->code.'_livenet');
+        $data['value_payment_api_key'] = $this->config->get($this->code.'_payment_api_key');
+        $data['value_risk_speed'] = $this->config->get($this->code.'_risk_speed');
+        $data['value_paid_status'] = $this->config->get($this->code.'_paid_status');
+        $data['value_confirmed_status'] = $this->config->get($this->code.'_confirmed_status');
+        $data['value_completed_status'] = $this->config->get($this->code.'_completed_status');
+        $data['value_notification_url'] = $this->config->get($this->code.'_notification_url');
+        $data['value_redirect_url'] = $this->config->get($this->code.'_redirect_url');
+        $data['value_debugging'] = $this->config->get($this->code.'_logging');
 
         $this->load->model('localisation/order_status');
         $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
@@ -210,7 +227,7 @@ class ControllerExtensionPaymentGlobee extends Controller
     {
         fclose(fopen(DIR_LOGS.'globee.log', 'w'));
         $this->session->data['success'] = $this->language->get('notification_log_success');
-        $this->response->redirect($this->url->link('extension/payment/globee', 'user_token='.$this->session->data['user_token'], 'SSL'));
+        $this->response->redirect($this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], 'SSL'));
     }
 
     /**
@@ -227,39 +244,41 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         // Ensure the notification URL is set and a valid URL
-        if (!empty($this->request->post['payment_globee_notification_url']) && false === filter_var($this->request->post['payment_globee_notification_url'], FILTER_VALIDATE_URL)) {
+        if (!empty($this->request->post[$this->code.'_notification_url']) && false === filter_var($this->request->post[$this->code.'_notification_url'], FILTER_VALIDATE_URL)) {
             $data['error_notification_url'] = $this->language->get('notification_error_notification_url');
         }
 
         // Ensure the redirect URL is set and a valid URL
-        if (!empty($this->request->post['payment_globee_redirect_url']) && false === filter_var($this->request->post['payment_globee_redirect_url'], FILTER_VALIDATE_URL)) {
+        if (!empty($this->request->post[$this->code.'_redirect_url']) && false === filter_var($this->request->post[$this->code.'_redirect_url'], FILTER_VALIDATE_URL)) {
             $data['error_redirect_url'] = $this->language->get('notification_error_redirect_url');
         }
 
         // Ensure the plugin cannot be activated without a payment api key
-        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_payment_api_key'])) {
+        if ($this->request->post[$this->code.'_status'] == 1 && empty($this->request->post[$this->code.'_payment_api_key'])) {
             $data['error_enabled'] = $this->language->get('notification_error_payment_api_key_enabled');
             $data['error_payment_api_key'] = $this->language->get('notification_error_payment_api_key');
         }
 
         // Ensure the plugin cannot be activated without a callback URL
-        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_notification_url'])) {
+        if ($this->request->post[$this->code.'_status'] == 1 && empty($this->request->post[$this->code.'_notification_url'])) {
             $data['error_enabled'] = $this->language->get('notification_error_notification_url_enabled');
             $data['error_notification_url'] = $this->language->get('notification_error_notification_url');
         }
 
         // Ensure the plugin cannot be activated without a redirect URL
-        if ($this->request->post['payment_globee_status'] == 1 && empty($this->request->post['payment_globee_redirect_url'])) {
+        if ($this->request->post[$this->code.'_status'] == 1 && empty($this->request->post[$this->code.'_redirect_url'])) {
             $data['error_enabled'] = $this->language->get('notification_error_redirect_url_enabled');
             $data['error_redirect_url'] = $this->language->get('notification_error_redirect_url');
         }
 
         // Check that if the Payment API Key was changed, it can communicate with GloBee
         if (
-            $this->config->get('payment_globee_payment_api_key') != $this->request->post['payment_globee_redirect_url'] ||
-            $this->config->get('payment_globee_livenet') != $this->request->post['payment_globee_livenet']
+            !empty($this->config->get($this->code.'_payment_api_key')) && (
+                $this->config->get($this->code.'_payment_api_key') != $this->request->post[$this->code.'_redirect_url'] ||
+                $this->config->get($this->code.'_livenet') != $this->request->post[$this->code.'_livenet']
+            )
         ) {
-            $connector = new GloBeeCurlConnector($this->request->post['payment_globee_payment_api_key'], $this->request->post['payment_globee_livenet']);
+            $connector = new GloBeeCurlConnector($this->request->post[$this->code.'_payment_api_key'], $this->request->post[$this->code.'_livenet']);
             $paymentApi = new PaymentApi($connector);
 
             try {
@@ -285,12 +304,6 @@ class ControllerExtensionPaymentGlobee extends Controller
         # PHP
         if (true === version_compare(PHP_VERSION, '5.5.0', '<')) {
             $errors[] = 'Your PHP version is too old. The GloBee payment plugin requires PHP 5.4 or higher'
-                .$contactYourWebAdmin;
-        }
-
-        # OpenCart
-        if (true === version_compare(VERSION, '3.0.0', '<')) {
-            $errors[] = 'Your Opencart version is too old. This plugin is intended for OpenCart v3.0.0 and above'
                 .$contactYourWebAdmin;
         }
 
