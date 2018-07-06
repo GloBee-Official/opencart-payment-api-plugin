@@ -9,16 +9,31 @@ use GloBee\PaymentApi\PaymentApi;
 
 class ControllerExtensionPaymentGloBee extends Controller
 {
+    /** @var string  */
+    protected $code = 'payment_globee';
+
+    /**
+     * ControllerExtensionPaymentGloBee constructor.
+     *
+     * @param $registry
+     */
     public function __construct($registry)
     {
         parent::__construct($registry);
+
+        if (true === version_compare(VERSION, '3.0.0', '<')) {
+            $this->code = 'globee';
+        }
     }
 
+    /**
+     * @return mixed
+     */
     public function index()
     {
         $this->load->language('extension/payment/globee');
 
-        $data['testnet'] = ($this->config->get('payment_globee_livenet') == 0) ? true : false;
+        $data['testnet'] = ($this->config->get($this->code.'_livenet') == 0) ? true : false;
         $data['text_title'] = $this->language->get('text_title');
         $data['warning_testnet'] = $this->language->get('warning_testnet');
         $data['url_redirect'] = $this->url->link('extension/payment/globee/confirm', $this->config->get('config_secure'));
@@ -54,16 +69,16 @@ class ControllerExtensionPaymentGloBee extends Controller
             return;
         }
 
-        $connector = new GloBeeCurlConnector($this->config->get('payment_globee_payment_api_key'), $this->config->get('payment_globee_livenet'));
+        $connector = new GloBeeCurlConnector($this->config->get($this->code.'_payment_api_key'), $this->config->get($this->code.'_livenet'));
         $paymentApi = new PaymentApi($connector);
 
         $paymentRequest = new PaymentRequest();
         $paymentRequest->total = $order_info['total'];
         $paymentRequest->customerName = trim($order_info['firstname'].' '.$order_info['lastname']);
         $paymentRequest->customerEmail = $order_info['email'];
-        $paymentRequest->confirmationSpeed = $this->config->get('payment_globee_risk_speed');
-        $paymentRequest->successUrl = $this->config->get('payment_globee_redirect_url');
-        $paymentRequest->ipnUrl = $this->config->get('payment_globee_notification_url');
+        $paymentRequest->confirmationSpeed = $this->config->get($this->code.'_risk_speed');
+        $paymentRequest->successUrl = $this->config->get($this->code.'_redirect_url');
+        $paymentRequest->ipnUrl = $this->config->get($this->code.'_notification_url');
         $paymentRequest->cancelUrl = $this->url->link('checkout/cart', $this->config->get('config_secure'));
         $paymentRequest->currency = $order_info['currency_code'];
         $paymentRequest->customPaymentId = $this->session->data['order_id'];
@@ -104,7 +119,7 @@ class ControllerExtensionPaymentGloBee extends Controller
 
         $order = $this->model_checkout_order->getOrder($order_id);
         try {
-            $connector = new GloBeeCurlConnector($this->config->get('payment_globee_payment_api_key'), $this->config->get('payment_globee_livenet'));
+            $connector = new GloBeeCurlConnector($this->config->get($this->code.'_payment_api_key'), $this->config->get($this->code.'_livenet'));
             $paymentApi = new PaymentApi($connector);
             $paymentRequest = $paymentApi->getPaymentRequest($this->session->data['globee_invoice_id']);
         } catch (Exception $e) {
@@ -117,13 +132,13 @@ class ControllerExtensionPaymentGloBee extends Controller
 
         switch ($paymentRequest->status) {
             case 'paid':
-                $order_status_id = $this->config->get('payment_globee_paid_status');
+                $order_status_id = $this->config->get($this->code.'_paid_status');
                 break;
             case 'confirmed':
-                $order_status_id = $this->config->get('payment_globee_confirmed_status');
+                $order_status_id = $this->config->get($this->code.'_confirmed_status');
                 break;
             case 'complete':
-                $order_status_id = $this->config->get('payment_globee_completed_status');
+                $order_status_id = $this->config->get($this->code.'_completed_status');
                 break;
             default:
                 $this->response->redirect($this->url->link('checkout/checkout'));
@@ -165,7 +180,7 @@ class ControllerExtensionPaymentGloBee extends Controller
             return;
         }
 
-        $connector = new GloBeeCurlConnector($this->config->get('payment_globee_payment_api_key'), $this->config->get('payment_globee_livenet'));
+        $connector = new GloBeeCurlConnector($this->config->get($this->code.'_payment_api_key'), $this->config->get($this->code.'_livenet'));
         $paymentApi = new PaymentApi($connector);
         $paymentRequest = $paymentApi->getPaymentRequest($json['id']);
         $order_status_id = null;
@@ -173,15 +188,15 @@ class ControllerExtensionPaymentGloBee extends Controller
         switch ($paymentRequest->status) {
             case 'paid':
                 $this->log('Marking order as paid for Payment Request with GloBee ID: '.$json['id']);
-                $order_status_id = $this->config->get('payment_globee_paid_status');
+                $order_status_id = $this->config->get($this->code.'_paid_status');
                 break;
             case 'confirmed':
                 $this->log('Marking order as confirmed for Payment Request with GloBee ID: '.$json['id']);
-                $order_status_id = $this->config->get('payment_globee_confirmed_status');
+                $order_status_id = $this->config->get($this->code.'_confirmed_status');
                 break;
             case 'complete':
                 $this->log('Marking order as completed for Payment Request with GloBee ID: '.$json['id']);
-                $order_status_id = $this->config->get('payment_globee_completed_status');
+                $order_status_id = $this->config->get($this->code.'_completed_status');
                 break;
             default:
                 return;
@@ -197,7 +212,7 @@ class ControllerExtensionPaymentGloBee extends Controller
      */
     public function log($message)
     {
-        if ($this->config->get('payment_globee_logging') != true) {
+        if ($this->config->get($this->code.'_logging') != true) {
             return;
         }
         $log = new Log('globee.log');
