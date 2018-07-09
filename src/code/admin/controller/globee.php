@@ -1,12 +1,22 @@
 <?php
 
-require __DIR__.'/../../../../system/library/globee/autoload.php';
+if (true === version_compare(VERSION, '2.3.0', '<')) {
+    require __DIR__.'/../../../system/library/globee/autoload.php';
+} else {
+    require __DIR__.'/../../../../system/library/globee/autoload.php';
+}
 
 use GloBee\PaymentApi\Connectors\GloBeeCurlConnector;
 use GloBee\PaymentApi\Exceptions\Http\AuthenticationException;
 use GloBee\PaymentApi\Models\PaymentRequest;
 use GloBee\PaymentApi\PaymentApi;
 
+/** Used by OC 2.1 */
+class ControllerPaymentGlobee extends ControllerExtensionPaymentGlobee {}
+
+/**
+ * Class ControllerExtensionPaymentGlobee
+ */
 class ControllerExtensionPaymentGlobee extends Controller
 {
     /** @var array */
@@ -19,10 +29,16 @@ class ControllerExtensionPaymentGlobee extends Controller
     protected $token = 'user_token';
 
     /** @var string  */
-    protected $paymentExtensionLink = 'marketplace/extension';
+    protected $paymentBreadcrumbLink = 'marketplace/extension';
+
+    /** @var string  */
+    protected $paymentExtensionLink = 'extension/payment';
 
     /** @var string  */
     protected $code = 'payment_globee';
+
+    /** @var string  */
+    protected $viewPath = 'extension/payment/globee';
 
     /**
      * ControllerExtensionPaymentGlobee constructor.
@@ -40,13 +56,19 @@ class ControllerExtensionPaymentGlobee extends Controller
 
         $this->registry = $registry;
 
-        $this->load->language('extension/payment/globee');
-
-        if (true === version_compare(VERSION, '3.0.0', '<')) {
+        if (true === version_compare(VERSION, '2.3.0', '<')) {
             $this->token = 'token';
-            $this->paymentExtensionLink = 'extension/extension';
+            $this->viewPath = 'payment/globee.tpl';
+            $this->paymentExtensionLink = 'payment';
+            $this->paymentBreadcrumbLink = 'extension/payment';
+            $this->code = 'globee';
+        } elseif (true === version_compare(VERSION, '3.0.0', '<')) {
+            $this->token = 'token';
+            $this->paymentBreadcrumbLink = 'extension/extension';
             $this->code = 'globee';
         }
+
+        $this->load->language($this->paymentExtensionLink.'/globee');
     }
 
     /**
@@ -82,8 +104,18 @@ class ControllerExtensionPaymentGlobee extends Controller
     {
         $this->log('Installing');
         $this->load->model('localisation/order_status');
-        $this->load->model('extension/payment/globee');
-        $this->model_extension_payment_globee->install();
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_status','0','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_sort_order','1','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_livenet','1','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_payment_api_key','','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_risk_speed','medium','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_paid_status',2,'0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_confirmed_status',15,'0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_completed_status',5,'0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_notification_url','".str_replace("admin/", "", $this->url->link($this->paymentExtensionLink.'/globee/callback', $this->config->get('config_secure')))."','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_redirect_url','".str_replace("admin/", "", $this->url->link($this->paymentExtensionLink.'/globee/success', $this->config->get('config_secure')))."','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_logging','1','0');");
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`,`code`,`key`,`value`,`serialized`) VALUES ('0','".$this->code."','".$this->code."_geo_zone_id','0','0');");
     }
 
     /**
@@ -92,8 +124,8 @@ class ControllerExtensionPaymentGlobee extends Controller
     public function uninstall()
     {
         $this->log('Uninstalling');
-        $this->load->model('extension/payment/globee');
-        $this->model_extension_payment_globee->uninstall();
+        $this->load->model('setting/setting');
+        $this->model_setting_setting->deleteSetting($this->code);
     }
 
     /**
@@ -112,7 +144,7 @@ class ControllerExtensionPaymentGlobee extends Controller
                 $this->model_setting_setting->editSetting($this->code, $this->request->post);
                 $this->log('Settings Updated.');
                 $this->session->data['success'] = $this->language->get('notification_success');
-                $this->response->redirect($this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], true));
+                $this->response->redirect($this->url->link($this->paymentExtensionLink.'/globee', $this->token.'='.$this->session->data[$this->token], true));
             }
         }
 
@@ -124,9 +156,9 @@ class ControllerExtensionPaymentGlobee extends Controller
         $data['footer'] = $this->load->controller('common/footer');
 
         // Links
-        $data['url_action'] = $this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], 'SSL');
-        $data['url_reset'] = $this->url->link('extension/payment/globee/reset', $this->token.'='.$this->session->data[$this->token], 'SSL');
-        $data['url_clear'] = $this->url->link('extension/payment/globee/clear', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['url_action'] = $this->url->link($this->paymentExtensionLink.'/globee', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['url_reset'] = $this->url->link($this->paymentExtensionLink.'/globee/reset', $this->token.'='.$this->session->data[$this->token], 'SSL');
+        $data['url_clear'] = $this->url->link($this->paymentExtensionLink.'/globee/clear', $this->token.'='.$this->session->data[$this->token], 'SSL');
         $data['cancel'] = $this->url->link($this->paymentExtensionLink, $this->token.'='.$this->session->data[$this->token].'&type=payment', 'SSL');
 
         // Buttons
@@ -142,11 +174,11 @@ class ControllerExtensionPaymentGlobee extends Controller
             ),
             array(
                 'text' => $this->language->get('text_payment'),
-                'href' => $this->url->link($this->paymentExtensionLink, $this->token.'='.$this->session->data[$this->token] . '&type=payment', true)
+                'href' => $this->url->link($this->paymentBreadcrumbLink, $this->token.'='.$this->session->data[$this->token] . '&type=payment', true)
             ),
             array(
                 'text' => $this->language->get('globee'),
-                'href' => $this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], true)
+                'href' => $this->url->link($this->paymentExtensionLink.'/globee', $this->token.'='.$this->session->data[$this->token], true)
             ),
         );
 
@@ -217,7 +249,7 @@ class ControllerExtensionPaymentGlobee extends Controller
         }
 
         // Send output to browser
-        $this->response->setOutput($this->load->view('extension/payment/globee', $data));
+        $this->response->setOutput($this->load->view($this->viewPath, $data));
     }
 
     /**
@@ -227,7 +259,7 @@ class ControllerExtensionPaymentGlobee extends Controller
     {
         fclose(fopen(DIR_LOGS.'globee.log', 'w'));
         $this->session->data['success'] = $this->language->get('notification_log_success');
-        $this->response->redirect($this->url->link('extension/payment/globee', $this->token.'='.$this->session->data[$this->token], 'SSL'));
+        $this->response->redirect($this->url->link($this->paymentExtensionLink.'/globee', $this->token.'='.$this->session->data[$this->token], 'SSL'));
     }
 
     /**
@@ -239,7 +271,7 @@ class ControllerExtensionPaymentGlobee extends Controller
     {
         $data = array();
         // Ensure the user has the permission to modify the plugin
-        if (!$this->user->hasPermission('modify', 'extension/payment/globee')) {
+        if (!$this->user->hasPermission('modify', $this->paymentExtensionLink.'/globee')) {
             $data['error_warning'] = $this->language->get('warning_permission');
         }
 
@@ -273,8 +305,8 @@ class ControllerExtensionPaymentGlobee extends Controller
 
         // Check that if the Payment API Key was changed, it can communicate with GloBee
         if (
-            !empty($this->config->get($this->code.'_payment_api_key')) && (
-                $this->config->get($this->code.'_payment_api_key') != $this->request->post[$this->code.'_redirect_url'] ||
+            !empty($this->request->post[$this->code.'_payment_api_key']) && (
+                $this->config->get($this->code.'_payment_api_key') != $this->request->post[$this->code.'_payment_api_key'] ||
                 $this->config->get($this->code.'_livenet') != $this->request->post[$this->code.'_livenet']
             )
         ) {

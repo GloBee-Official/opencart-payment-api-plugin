@@ -1,16 +1,34 @@
 <?php
 
-require __DIR__.'/../../../../system/library/globee/autoload.php';
+if (true === version_compare(VERSION, '2.3.0', '<')) {
+    require __DIR__.'/../../../system/library/globee/autoload.php';
+} else {
+    require __DIR__.'/../../../../system/library/globee/autoload.php';
+}
 
 use GloBee\PaymentApi\Connectors\GloBeeCurlConnector;
 use GloBee\PaymentApi\Exceptions\Validation\ValidationException;
 use GloBee\PaymentApi\Models\PaymentRequest;
 use GloBee\PaymentApi\PaymentApi;
 
+class ControllerPaymentGlobee extends ControllerExtensionPaymentGloBee {}
+
+/**
+ * Class ControllerExtensionPaymentGloBee
+ */
 class ControllerExtensionPaymentGloBee extends Controller
 {
     /** @var string  */
     protected $code = 'payment_globee';
+
+    /** @var string  */
+    protected $confirmPath = 'extension/payment';
+
+    /** @var string  */
+    protected $viewPath = 'extension/payment/globee';
+
+    /** @var string  */
+    protected $languagePath = 'extension/payment/globee';
 
     /**
      * ControllerExtensionPaymentGloBee constructor.
@@ -24,6 +42,16 @@ class ControllerExtensionPaymentGloBee extends Controller
         if (true === version_compare(VERSION, '3.0.0', '<')) {
             $this->code = 'globee';
         }
+        if (true === version_compare(VERSION, '2.3.0', '<')) {
+            $this->viewPath = 'payment/globee.tpl';
+            $this->confirmPath = 'payment';
+            $this->languagePath = 'payment/globee';
+        }
+        if (true === version_compare(VERSION, '2.2.0', '<')) {
+            $this->viewPath = 'default/template/payment/globee.tpl';
+        }
+
+        $this->load->language($this->languagePath);
     }
 
     /**
@@ -31,12 +59,10 @@ class ControllerExtensionPaymentGloBee extends Controller
      */
     public function index()
     {
-        $this->load->language('extension/payment/globee');
-
         $data['testnet'] = ($this->config->get($this->code.'_livenet') == 0) ? true : false;
         $data['text_title'] = $this->language->get('text_title');
         $data['warning_testnet'] = $this->language->get('warning_testnet');
-        $data['url_redirect'] = $this->url->link('extension/payment/globee/confirm', $this->config->get('config_secure'));
+        $data['url_redirect'] = $this->url->link($this->confirmPath.'/globee/confirm', $this->config->get('config_secure'));
         $data['button_confirm'] = $this->language->get('button_confirm');
         if (isset($this->session->data['error_globee'])) {
             $data['error_globee'] = $this->session->data['error_globee'];
@@ -44,9 +70,9 @@ class ControllerExtensionPaymentGloBee extends Controller
         }
 
         if (file_exists(DIR_TEMPLATE.$this->config->get('config_template').'/template/extension/payment/globee')) {
-            return $this->load->view($this->config->get('config_template').'/template/extension/payment/globee', $data);
+            return $this->load->view($this->config->get('config_template').'/template/'.$this->viewPath, $data);
         }
-        return $this->load->view('extension/payment/globee', $data);
+        return $this->load->view($this->viewPath, $data);
     }
 
     /**
@@ -107,7 +133,6 @@ class ControllerExtensionPaymentGloBee extends Controller
      */
     public function success()
     {
-        $this->load->language('extension/payment/globee');
         $this->load->model('checkout/order');
 
         $order_id = $this->session->data['order_id'];
